@@ -108,9 +108,9 @@ module.exports.Login = asyncWrap(async (req, res) => {
 
     res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 7 * 24 * 60 * 60 * 1000
+        secure: true,
+        sameSite: "none",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     const userData = user.toObject();
@@ -166,11 +166,10 @@ module.exports.Logout = asyncWrap(async (req, res) => {
 
 
     res.clearCookie("refreshToken", {
-
         httpOnly: true,
         secure: true,
-        sameSite: "lax"
-    })
+        sameSite: "none",
+    });
 
     res.status(200).json({ message: "Logout Successfully", success: true });
 
