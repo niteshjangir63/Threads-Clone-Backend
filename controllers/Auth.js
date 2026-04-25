@@ -133,10 +133,9 @@ module.exports.Login = asyncWrap(async (req, res) => {
 });
 
 
-// refresh token
+
 
 module.exports.refreshToken = async (req, res) => {
-
     const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken) {
@@ -144,11 +143,7 @@ module.exports.refreshToken = async (req, res) => {
     }
 
     try {
-
-        const decoded = jwt.verify(
-            refreshToken,
-            process.env.REFRESH_SECRET
-        );
+        const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
 
         const accessToken = jwt.sign(
             { id: decoded.id },
@@ -156,21 +151,29 @@ module.exports.refreshToken = async (req, res) => {
             { expiresIn: "15m" }
         );
 
-        res.json({ accessToken });
-
-    } catch (e) {
-
-        res.status(401).json({
-            message: "Invalid refresh token"
+        // IMPORTANT: set new accessToken cookie
+        res.cookie("accessToken", accessToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+            maxAge: 15 * 60 * 1000,
         });
 
+        res.json({ success: true, message: "Token refreshed" });
+    } catch (e) {
+        res.status(401).json({
+            message: "Invalid refresh token",
+        });
     }
 };
 
 
-
 module.exports.Logout = asyncWrap(async (req, res) => {
-
+    res.clearCookie("accessToken", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+    });
 
     res.clearCookie("refreshToken", {
         httpOnly: true,
@@ -178,6 +181,8 @@ module.exports.Logout = asyncWrap(async (req, res) => {
         sameSite: "none",
     });
 
-    res.status(200).json({ message: "Logout Successfully", success: true });
-
-})
+    res.status(200).json({
+        message: "Logout Successfully",
+        success: true,
+    });
+});
