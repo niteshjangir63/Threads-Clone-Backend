@@ -1,5 +1,5 @@
-const dns = require('dns');
-dns.setServers(['8.8.8.8', '8.8.4.4']); // Use Google Public DNS
+const dns = require("dns");
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 require("dotenv").config();
 
@@ -13,36 +13,36 @@ const cookies = require("cookie-parser");
 const cors = require("cors");
 const path = require("path");
 
-app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://threads.niteshjangir426.workers.dev"
-  ],
-  credentials: true
-}));
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://threads.niteshjangir426.workers.dev",
+];
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookies());
 
-
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
 
 const connectDB = require("./config/connectDb");
 connectDB();
 
 const server = http.createServer(app);
 
-
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: allowedOrigins,
     credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   },
 });
-
 
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
@@ -56,7 +56,6 @@ io.on("connection", (socket) => {
     console.log("User disconnected:", socket.id);
   });
 });
-
 
 app.use((req, res, next) => {
   req.io = io;
@@ -72,9 +71,10 @@ app.use("/", require("./routes/User"));
 app.use("/comment", require("./routes/Comment"));
 app.use("/", require("./routes/Follow"));
 app.use("/", require("./routes/forgot"));
-app.use("/notification", require("./routes/Notification"));
+app.use("/notifications", require("./routes/Notification")); // use plural
 
-// Start server
-server.listen(process.env.PORT, () => {
-  console.log(`Server running with sockets on port ${process.env.PORT}`);
+const PORT = process.env.PORT || 5000;
+
+server.listen(PORT, () => {
+  console.log(`Server running with sockets on port ${PORT}`);
 });
