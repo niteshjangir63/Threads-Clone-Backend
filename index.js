@@ -71,7 +71,7 @@ app.use("/", require("./routes/User"));
 app.use("/comment", require("./routes/Comment"));
 app.use("/", require("./routes/Follow"));
 app.use("/", require("./routes/forgot"));
-app.use("/notifications", require("./routes/Notification")); // use plural
+app.use("/notifications", require("./routes/Notification"));
 
 const PORT = process.env.PORT || 5000;
 
