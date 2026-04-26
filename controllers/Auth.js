@@ -151,7 +151,7 @@ module.exports.refreshToken = async (req, res) => {
             { expiresIn: "15m" }
         );
 
-        // IMPORTANT: set new accessToken cookie
+
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
             secure: true,

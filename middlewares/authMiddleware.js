@@ -39,7 +39,7 @@ module.exports.verifyToken = (req, res, next) => {
       maxAge: 15 * 60 * 1000,
     });
 
-    // 🔥 IMPORTANT: also use it NOW
+    
     req.userId = decoded.id;
 
     return next();
