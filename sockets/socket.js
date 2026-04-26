@@ -4,7 +4,7 @@ let io;
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://threads.niteshjangir426.workers.dev",
+  "https://threadsweb.netlify.app",
 ];
 
 const initSocket = (server) => {
