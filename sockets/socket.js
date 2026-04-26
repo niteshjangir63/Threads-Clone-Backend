@@ -2,15 +2,11 @@ const { Server } = require("socket.io");
 
 let io;
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://threadsweb-psi.vercel.app",
-];
 
 const initSocket = (server) => {
   io = new Server(server, {
     cors: {
-      origin: allowedOrigins,
+      origin: "https://threadsweb-psi.vercel.app",
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     },

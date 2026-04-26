@@ -13,14 +13,11 @@ const cookies = require("cookie-parser");
 const cors = require("cors");
 const path = require("path");
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://threadsweb-psi.vercel.app",
-];
+
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: "https://threadsweb-psi.vercel.app",
     credentials: true,
   })
 );
@@ -38,7 +35,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: "https://threadsweb-psi.vercel.app",
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   },
