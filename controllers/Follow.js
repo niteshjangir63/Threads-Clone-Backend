@@ -3,8 +3,8 @@ const Notification = require("../models/Notification");
 const { asyncWrap } = require("../utils/asyncWrap");
 
 module.exports.isFollow = asyncWrap(async (req, res) => {
-  const userId = req.userId;
-  const targetUserId = req.params.id;
+  const userId = req.userId.toString();
+  const targetUserId = req.params.id.toString();
 
   if (userId === targetUserId) {
     return res.status(400).json({ message: "Cannot follow yourself" });
@@ -19,7 +19,6 @@ module.exports.isFollow = asyncWrap(async (req, res) => {
 
   const isFollowing = user.following.includes(targetUserId);
 
-
   if (isFollowing) {
     user.following.pull(targetUserId);
     targetUser.followers.pull(userId);
@@ -30,14 +29,12 @@ module.exports.isFollow = asyncWrap(async (req, res) => {
     return res.json({ message: "Unfollowed" });
   }
 
-
   user.following.push(targetUserId);
   targetUser.followers.push(userId);
 
   await user.save();
   await targetUser.save();
 
- 
   const notification = await Notification.create({
     senderId: userId,
     receiverId: targetUserId,
@@ -45,13 +42,11 @@ module.exports.isFollow = asyncWrap(async (req, res) => {
     message: "started following you",
   });
 
-
   const populatedNotification = await notification.populate(
     "senderId",
     "username profile"
   );
 
-  
   req.io.to(targetUserId).emit("notification", populatedNotification);
 
   res.json({ message: "Following" });

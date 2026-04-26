@@ -4,55 +4,56 @@ const Post = require("../models/Post");
 const Notification = require("../models/Notification");
 
 module.exports.handleComment = asyncWrap(async (req, res) => {
+  const { content } = req.body;
+  const { postId } = req.params;
 
+  if (!content) {
+    return res.status(400).json({ message: "Content Required!" });
+  }
 
-    const { content } = req.body;
-    const { postId } = req.params;
+  const newComment = new Comment({
+    content,
+    postId,
+    userId: req.userId,
+  });
 
+  await newComment.save();
 
-    if (!content) {
+  const populatedComment = await newComment.populate(
+    "userId",
+    "username profile"
+  );
 
-        return res.json({ message: "Content Required!" });
+  const post = await Post.findById(postId).populate("author");
+
+  if (post) {
+    const receiverId = post.author._id.toString();
+    const senderId = req.userId.toString();
+
+    if (receiverId !== senderId) {
+      const notification = await Notification.create({
+        senderId,
+        receiverId,
+        postId,
+        commentId: newComment._id,
+        type: "COMMENT",
+        message: content,
+      });
+
+      const populatedNotification = await notification.populate(
+        "senderId",
+        "username profile"
+      );
+
+      req.io.to(receiverId).emit("notification", populatedNotification);
     }
+  }
 
-
-    const newComment = new Comment({
-        content: content,
-        postId: postId,
-        userId: req.userId
-    })
-
-    await newComment.save();
-
-    const post = await Post.findById(postId).populate("author");
-
-
-    if (post) {
-
-        const receiverId = post.author._id.toString();
-        const senderId = req.userId.toString();
-
-        if (receiverId !== senderId) {
-            const notification = await Notification.create({
-                senderId,
-                receiverId,
-                postId,
-                commentId: newComment._id,
-                type: "COMMENT",
-                message: content,
-            });
-
-            req.io.to(receiverId).emit("notification", notification);
-        }
-    }
-
-    const populateComment = await newComment.populate("userId")
-
-    res.json({ message: "Comment Successfully!", comments: populateComment });
-
-
-})
-
+  res.json({
+    message: "Comment Successfully!",
+    comments: populatedComment,
+  });
+});
 
 module.exports.getComments = asyncWrap(async (req, res) => {
 

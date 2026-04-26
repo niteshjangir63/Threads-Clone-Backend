@@ -108,8 +108,10 @@ module.exports.likePost = asyncWrap(async (req, res) => {
     });
   }
 
-  if (post.likes.includes(req.userId)) {
-    post.likes.pull(req.userId);
+  const senderId = req.userId.toString();
+
+  if (post.likes.some((id) => id.toString() === senderId)) {
+    post.likes.pull(senderId);
     await post.save();
 
     return res.json({
@@ -119,11 +121,10 @@ module.exports.likePost = asyncWrap(async (req, res) => {
     });
   }
 
-  post.likes.push(req.userId);
+  post.likes.push(senderId);
   await post.save();
 
   const receiverId = post.author._id.toString();
-  const senderId = req.userId.toString();
 
   if (receiverId !== senderId) {
     const notification = await Notification.create({

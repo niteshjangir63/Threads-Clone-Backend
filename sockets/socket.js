@@ -20,7 +20,9 @@ const initSocket = (server) => {
     console.log("User connected:", socket.id);
 
     socket.on("joinUser", (userId) => {
-      socket.join(userId);
+      if (!userId) return;
+
+      socket.join(userId.toString());
       console.log("User joined room:", userId);
     });
 

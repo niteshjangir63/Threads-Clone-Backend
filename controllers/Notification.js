@@ -1,21 +1,20 @@
-const express = require("express");
-const router = express.Router();
 const Notification = require("../models/Notification");
-const {asyncWrap} = require("../utils/asyncWrap")
-module.exports.notification = (asyncWrap(async (req, res) => {
+const { asyncWrap } = require("../utils/asyncWrap");
+
+module.exports.notification = asyncWrap(async (req, res) => {
   const notifications = await Notification.find({
     receiverId: req.userId,
   })
     .populate("senderId", "username profile")
     .sort({ createdAt: -1 });
 
-  res.json({ notifications });
-}));
+  res.status(200).json({
+    success: true,
+    notifications,
+  });
+});
 
-
-
-
- module.exports.isRead = (asyncWrap( async (req, res) => {
+module.exports.isRead = asyncWrap(async (req, res) => {
   const notification = await Notification.findOneAndUpdate(
     {
       _id: req.params.id,
@@ -23,7 +22,17 @@ module.exports.notification = (asyncWrap(async (req, res) => {
     },
     { isRead: true },
     { new: true }
-  );
+  ).populate("senderId", "username profile");
 
-  res.json({ success: true, notification });
-}));
+  if (!notification) {
+    return res.status(404).json({
+      success: false,
+      message: "Notification not found",
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    notification,
+  });
+});

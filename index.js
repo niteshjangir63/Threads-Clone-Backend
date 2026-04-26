@@ -48,9 +48,11 @@ io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
   socket.on("joinUser", (userId) => {
-    socket.join(userId);
-    console.log("User joined room:", userId);
-  });
+  if (!userId) return;
+
+  socket.join(userId.toString());
+  console.log("User joined room:", userId);
+});
 
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
