@@ -15,7 +15,7 @@ const path = require("path");
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://threadsweb.netlify.app",
+  "https://threadsweb-psi.vercel.app",
 ];
 
 app.use(
