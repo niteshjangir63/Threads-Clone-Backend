@@ -1,21 +1,20 @@
 const jwt = require("jsonwebtoken");
 
 module.exports.verifyToken = (req, res, next) => {
-  let accessToken = req.cookies.accessToken;
+  const accessToken = req.cookies.accessToken;
 
-  // 1. If access token exists, verify it
+  // ✅ 1. Try access token
   if (accessToken) {
     try {
       const decoded = jwt.verify(accessToken, process.env.ACCESS_SECRET);
       req.userId = decoded.id;
       return next();
     } catch (err) {
-
-
+      console.log("Access token expired, trying refresh...");
     }
   }
 
-
+  // ✅ 2. Try refresh token
   const refreshToken = req.cookies.refreshToken;
 
   if (!refreshToken) {
@@ -25,12 +24,14 @@ module.exports.verifyToken = (req, res, next) => {
   try {
     const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
 
+    // 🔥 create new access token
     const newAccessToken = jwt.sign(
       { id: decoded.id },
       process.env.ACCESS_SECRET,
       { expiresIn: "15m" }
     );
 
+    // 🔥 set cookie for NEXT requests
     res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
       secure: true,
@@ -38,8 +39,10 @@ module.exports.verifyToken = (req, res, next) => {
       maxAge: 15 * 60 * 1000,
     });
 
+    // 🔥 IMPORTANT: also use it NOW
     req.userId = decoded.id;
-    next();
+
+    return next();
   } catch (err) {
     return res.status(401).json({ message: "Unauthorized: invalid token" });
   }
