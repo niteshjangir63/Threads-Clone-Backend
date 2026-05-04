@@ -6,7 +6,7 @@ let io;
 const initSocket = (server) => {
   io = new Server(server, {
     cors: {
-      origin: "https://threadsweb-psi.vercel.app",
+      origin: ["https://threadsweb-psi.vercel.app","http://localhost:5173"],
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     },

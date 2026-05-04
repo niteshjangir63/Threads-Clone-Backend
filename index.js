@@ -17,7 +17,7 @@ const path = require("path");
 
 app.use(
   cors({
-    origin: "https://threadsweb-psi.vercel.app",
+    origin: ["https://threadsweb-psi.vercel.app","http://localhost:5173"],
     credentials: true,
   })
 );
@@ -35,7 +35,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "https://threadsweb-psi.vercel.app",
+    origin: ["https://threadsweb-psi.vercel.app","http://localhost:5173"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   },
