@@ -29,11 +29,14 @@ module.exports.getPosts = asyncWrap(async (req, res) => {
     const posts = await Post.aggregate([
         { $sample: { size: 10 } } 
     ]);
-
+    
     const populatedPosts = await Post.populate(posts, { path: "author" });
+    const latestPosts = await Post.find().populate("author").sort({ createdAt: -1 });
+    
 
     res.status(200).json({
         posts: populatedPosts,
+        latest:latestPosts,
         success: true
     });
 
