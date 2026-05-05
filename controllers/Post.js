@@ -26,17 +26,18 @@ module.exports.createPost = asyncWrap(async (req, res) => {
 
 module.exports.getPosts = asyncWrap(async (req, res) => {
 
-    const posts = await Post.find().populate("author").sort({ createdAt: -1 });
+    const posts = await Post.aggregate([
+        { $sample: { size: 10 } } 
+    ]);
 
+    const populatedPosts = await Post.populate(posts, { path: "author" });
 
-    if (!posts) return res.status(401).json({ message: "posts not found", success: false });
+    res.status(200).json({
+        posts: populatedPosts,
+        success: true
+    });
 
-
-
-
-    res.status(201).json({ posts })
-
-})
+});
 
 
 module.exports.getPostById = asyncWrap(async (req, res) => {
