@@ -131,20 +131,29 @@ module.exports.likePost = asyncWrap(async (req, res) => {
   const receiverId = post.author._id.toString();
 
   if (receiverId !== senderId) {
-    const notification = await Notification.create({
+    const alreadyExists = await Notification.findOne({
       senderId,
       receiverId,
       postId: post._id,
       type: "LIKE",
-      message: "liked your post",
     });
 
-    const populatedNotification = await notification.populate(
-      "senderId",
-      "username profile"
-    );
+    if (!alreadyExists) {
+      const notification = await Notification.create({
+        senderId,
+        receiverId,
+        postId: post._id,
+        type: "LIKE",
+        message: "liked your post",
+      });
 
-    req.io.to(receiverId).emit("notification", populatedNotification);
+      const populatedNotification = await notification.populate(
+        "senderId",
+        "username profile"
+      );
+
+      req.io.to(receiverId).emit("notification", populatedNotification);
+    }
   }
 
   res.json({

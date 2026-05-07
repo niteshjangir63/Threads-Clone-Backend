@@ -36,3 +36,15 @@ module.exports.isRead = asyncWrap(async (req, res) => {
     notification,
   });
 });
+module.exports.isReadAll = asyncWrap(async (req, res) => {
+  const result = await Notification.updateMany(
+    { receiverId: req.userId, isRead: false },
+    { $set: { isRead: true } }
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "All notifications marked as read",
+    modifiedCount: result.modifiedCount,
+  });
+});
