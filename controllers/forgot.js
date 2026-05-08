@@ -6,33 +6,38 @@ const User = require("../models/User")
 const sendMail = require("../controllers/email")
 
 module.exports.sendOtp = asyncWrap(async (req, res) => {
-    const { email } = req.body;
+  const { email } = req.body;
 
-    if (!email) {
-        return res.json({ message: "email is required!" });
-    }
+  if (!email) {
+    return res.status(400).json({ message: "Email is required!" });
+  }
 
-    const user = await User.findOne({ email });
+  const user = await User.findOne({ email });
 
-    if (!user) return res.status(404).json({ message: "User not found!" });
+  if (!user) {
+    return res.status(404).json({ message: "User not found!" });
+  }
 
-    const otp = generateOtp();
-    console.log("OTP:", otp);
+  const otp = generateOtp();
+  console.log("OTP:", otp);
 
-    const hashOtp = await bcrypt.hash(otp, 10);
+  const hashOtp = await bcrypt.hash(otp, 10);
 
-    await Otp.findOneAndUpdate(
-        { email },
-        {
-            otp: hashOtp,
-            expireAt: new Date(Date.now() + 5 * 60 * 1000),
-        },
-        { upsert: true, new: true }
-    );
+  await Otp.findOneAndUpdate(
+    { email },
+    {
+      otp: hashOtp,
+      expireAt: new Date(Date.now() + 5 * 60 * 1000),
+    },
+    { upsert: true, new: true }
+  );
 
-    sendMail(email, "Your OTP Code", otp);
+  await sendMail(email, "Your OTP Code", otp);
 
-    res.json({ message: "OTP sent successfully!", success: true });
+  return res.status(200).json({
+    message: "OTP sent successfully!",
+    success: true,
+  });
 });
 
 
